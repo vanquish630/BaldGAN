@@ -8,4 +8,4 @@ __pycache__
 */.ipynb_checkpoints/* .ipynb
 styleganinv_ffhq256_encoder.pth
 styleganinv_ffhq256_generator.pth
-
+ckpt-25.data-00000-of-00001
