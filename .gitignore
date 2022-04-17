@@ -9,3 +9,4 @@ __pycache__
 styleganinv_ffhq256_encoder.pth
 styleganinv_ffhq256_generator.pth
 ckpt-25.data-00000-of-00001
+ckpt-25.index
