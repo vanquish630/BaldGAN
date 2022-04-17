@@ -4,4 +4,6 @@
  
 ## Make any person bald!!!
 
-The program automatically crops the input image to be centered on the face. Follow the included notebook to set up the repository.
+![ezcv logo](https://raw.githubusercontent.com/vanquish630/BaldGAN/master/samples/inpaintSample.png)
+
+The program automatically crops the input image to be centered on the face. Inpainting and inversion are performed on this cropped portion. Follow the included notebook to set up the repository.
