@@ -26,8 +26,8 @@ def parse_args():
     parser.add_argument('--save_align', dest='save_align', action='store_true',
                         help='save alignment and crop of input images.')
 
-    parser.add_argument('--use_hog', dest='use_hog', action='store_true',
-                        help='Use HOG + SVM in face detection instead of MMOD CNN.')
+    parser.add_argument('--use_mmod', dest='use_mmod', action='store_true',
+                        help=' Use MMOD CNN face detection instead of HOG + SVM')
 
     parser.add_argument('-o', '--output_dir', type=str, default='./results',
                         help='Directory to save the results. If not specified, '
@@ -124,28 +124,33 @@ def main():
         image = Image.open(os.path.join(args.test_dir, img)).convert("RGB")
         image = util.smartResize(image)
 
-        detected_bboxs = faceCropper.faceDetector(image)
+        detected_bboxs = faceCropper.faceDetector(image, args.use_mmod)
         numberDetectedFaces = len(detected_bboxs)
 
         if numberDetectedFaces == 1:
             face_crop_course, face_bbox_course, lmk68 = faceCropper.detect_face_simple(image)
             face_crop_refine, face_bbox_refine = faceCropper.refineCrop(face_crop_course, face_bbox_course)
-            inpainting_result = inpainter.inpainting(face_crop_refine, args.crop_size)
+
             if args.save_align:
                 plt.imsave(os.path.join(align_save_path, img_name), face_crop_refine)
 
+            inpainting_result = inpainter.inpainting(face_crop_refine, args.crop_size)
             plt.imsave(os.path.join(inpainting_save_path, img_name), inpainting_result)
 
-            resized_image = cv2.resize(inpainting_result, (args.crop_size, args.crop_size),interpolation=cv2.INTER_CUBIC)
+            resized_image = cv2.resize(inpainting_result, (args.crop_size, args.crop_size),
+                                       interpolation=cv2.INTER_CUBIC)
 
             if args.invert:
                 print("starting inversion!")
                 latent_code, reconstruction, ssim = util.invert(inverter=inverter, image=resized_image)
                 if ssim > args.inversion_threshold:
-                    np.save(os.path.join(latent_codes_save_path, f"{img_name.split('.')[0]}_latent_codes.npy"),latent_code[0])
+                    np.save(os.path.join(latent_codes_save_path, f"{img_name.split('.')[0]}_latent_codes.npy"),
+                            latent_code[0])
                     generated_images = latent_code_to_image_generator.easy_synthesize(latent_code, **{'latent_space_type': 'wp'})['image']
 
-                    generated_image = cv2.resize(generated_images[0], (generated_images[0].shape[1], generated_images[0].shape[0]),interpolation=cv2.INTER_CUBIC)
+                    generated_image = cv2.resize(generated_images[0],
+                                                 (generated_images[0].shape[1], generated_images[0].shape[0]),
+                                                 interpolation=cv2.INTER_CUBIC)
                     plt.imsave(os.path.join(latent_codes_save_path, img_name), generated_image)
                 else:
                     print("inversion unsucessfull")
@@ -159,28 +164,35 @@ def main():
 
                 face_crop_course, face_bbox_course = faceCropper.detect_face_multiple(image, bbox)
                 face_crop_refine, face_bbox_refine = faceCropper.refineCrop(face_crop_course, face_bbox_course)
-                resized_image = cv2.resize(np.array(face_crop_refine), (args.crop_size, args.crop_size), interpolation=cv2.INTER_CUBIC)
-                inpainting_result = inpainter.inpainting(face_crop_refine, args.crop_size)
 
                 if args.save_align:
-                    plt.imsave(os.path.join(align_save_path, img_name.split('.') + f"_{indx}.jpg"), face_crop_refine)
+                    plt.imsave(os.path.join(align_save_path, img_name.split('.')[0] + f"_{indx}.jpg"), face_crop_refine)
 
-                plt.imsave(os.path.join(inpainting_save_path, img_name.split('.') + f"_{indx}.jpg"), inpainting_result)
+                inpainting_result = inpainter.inpainting(face_crop_refine, args.crop_size)
+                plt.imsave(os.path.join(inpainting_save_path, img_name.split('.')[0] + f"_{indx}.jpg"),
+                           inpainting_result)
 
-                resized_image = cv2.resize(inpainting_result, (args.crop_size, args.crop_size),interpolation=cv2.INTER_CUBIC)
+                resized_image = cv2.resize(inpainting_result, (args.crop_size, args.crop_size),
+                                           interpolation=cv2.INTER_CUBIC)
 
                 if args.invert:
                     print("starting inversion!")
                     latent_code, reconstruction, ssim = util.invert(inverter=inverter, image=resized_image)
-                    if ssim>args.inversion_threshold:
-                        np.save(os.path.join(latent_codes_save_path, f"{img_name.split('.')[0]}_latent_codes_{indx}.npy"), latent_code[0])
-                        generated_images = latent_code_to_image_generator.easy_synthesize(latent_code, **{'latent_space_type': 'wp'})['image']
+                    if ssim > args.inversion_threshold:
+                        np.save(
+                            os.path.join(latent_codes_save_path, f"{img_name.split('.')[0]}_latent_codes_{indx}.npy"),
+                            latent_code[0])
+                        generated_images = \
+                        latent_code_to_image_generator.easy_synthesize(latent_code, **{'latent_space_type': 'wp'})[
+                            'image']
 
-                        generated_image = cv2.resize(generated_images[0], (generated_images[0].shape[1], generated_images[0].shape[0]), interpolation=cv2.INTER_CUBIC)
-                        plt.imsave(os.path.join(latent_codes_save_path, img_name.split('.') + f"_{indx}.jpg"), generated_image)
+                        generated_image = cv2.resize(generated_images[0],
+                                                     (generated_images[0].shape[1], generated_images[0].shape[0]),
+                                                     interpolation=cv2.INTER_CUBIC)
+                        plt.imsave(os.path.join(latent_codes_save_path, img_name.split('.') + f"_{indx}.jpg"),
+                                   generated_image)
                     else:
                         print("inversion unsucessfull")
-
 
 
 if __name__ == '__main__':

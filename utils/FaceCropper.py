@@ -35,17 +35,17 @@ class FaceCropper(object):
 
         return landmark
 
-    def faceDetector(self, image, use_hog = True):
+    def faceDetector(self, image, use_mmod = False):
 
-        self.use_hog = use_hog
+        self.use_mmod = use_mmod
 
         image = np.array(image)
-        if self.use_hog:
-            self.face_detector = dlib.get_frontal_face_detector()
-
-        else:
+        if self.use_mmod:
             mmod_face_detector_model_path = os.path.join(self.model_dir, self.mmod_model_name)
             self.face_detector = dlib.cnn_face_detection_model_v1(mmod_face_detector_model_path)
+        else:
+            self.face_detector = dlib.get_frontal_face_detector()
+
 
         bboxes = self.face_detector(image, 2)
 
@@ -102,7 +102,7 @@ class FaceCropper(object):
 
         cropped_image = np.array(image)[start_y: end_y, start_x: end_x]
 
-        return cropped_image
+        return cropped_image , [start_y, end_y, start_x, end_x]
 
     def refineCrop(self , image , bbox_course):
         crop_refine, bbox_refine = segment.returnfacebbox(np.array(image), msk_type='full',
