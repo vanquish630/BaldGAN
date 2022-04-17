@@ -1,0 +1,10 @@
+# ignore these folders
+__pycache__
+.idea
+pretrained_models
+
+#ignore these files
+.ipynb_checkpoints
+*/.ipynb_checkpoints/* .ipynb
+
+
