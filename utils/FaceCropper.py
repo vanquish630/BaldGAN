@@ -12,7 +12,7 @@ from skimage.transform import estimate_transform, warp, resize, rescale
 import dlib
 from .inverter import StyleGANInverter
 from utils import segment
-from  hairGAN.models.invert_model.helper import build_generator
+from  models.invert_model.helper import build_generator
 import scipy.ndimage
 
 
