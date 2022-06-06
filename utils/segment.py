@@ -7,7 +7,7 @@ import torch
 from torchvision import transforms
 import cv2
 from PIL import Image
-from hairGAN.models.segmentation_models.model import BiSeNet
+from models.segmentation_models.model import BiSeNet
 import math
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
